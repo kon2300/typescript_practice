@@ -40,7 +40,7 @@ class ObjectWrapper {
    * @param key オブジェクトのキー
    */
   get(key: string): string | undefined {
-    const result = Object.entries(this._obj).find((val) => {
+    const result: [string, string | undefined] | undefined = Object.entries(this._obj).find((val) => {
       if (val[0] === key) {
         return val[1]
       }
