@@ -1,61 +1,52 @@
-interface typeObject {
-  [key: string]: string
-}
-
-class ObjectWrapper {
+class ObjectWrapper<T> {
   /***
    * 引数のオブジェクトのコピーを this._objに設定
    */
-  constructor(private _obj: Partial<typeObject>) {
-    this._obj = { ..._obj }
-  }
+  constructor(private _obj: T) {}
 
   /**
    * this._objのコピーを返却
    * @return Object
    */
-  get obj(): Partial<typeObject> {
+  get obj(): T {
     return { ...this._obj }
   }
 
   /**
    * this._obj[key] に valを設定。keyがthis._objに存在しない場合、falseを返却
+   * (keyがthis._objに存在しない場合はコンパイルエラーになるため、falseは設定しない)
    * @param key オブジェクトのキー
    * @param val オブジェクトの値
    */
-  set(key: string, val: string): boolean {
-    let result: boolean = false
-    Object.keys(this._obj).forEach((e) => {
-      if (e === key) {
-        this._obj[key] = val
-        return (result = true)
-      }
-    })
-    return result ? true : false
+  set(key: keyof T, val: T[keyof T]): boolean {
+    this._obj[key] = val
+    return true
   }
 
   /**
    * 指定したキーの値のコピーを返却
    * 指定のキーが存在しない場合 undefinedを返却
+   * (keyがthis._objに存在しない場合はコンパイルエラーになるため、undefinedは設定しない)
    * @param key オブジェクトのキー
    */
-  get(key: string): string | undefined {
-    const result: [string, string | undefined] | undefined = Object.entries(this._obj).find((val) => {
-      if (val[0] === key) {
-        return val[1]
-      }
-    })
-    return result ? result[1] : undefined
+  get(key: keyof T): T[keyof T] {
+    const result = this._obj[key]
+    return result
   }
 
   /**
    * 指定した値を持つkeyの配列を返却。該当のものがなければ空の配列を返却。
    */
-  findKeys(val: unknown): string[] {
-    const result: string[] = Object.keys(this._obj).filter((key) => {
-      return this._obj[key] === val
-    })
-    return result
+  findKeys(val: T[keyof T]): (keyof T)[] {
+    const hasKeyArray: (keyof T)[] = []
+
+    for (let key in this._obj) {
+      if (this._obj[key] === val) {
+        hasKeyArray.push(key)
+      }
+    }
+
+    return hasKeyArray
   }
 }
 
@@ -72,13 +63,22 @@ if (wrappedObj1.obj.a === '01') {
   console.error('NG: get obj()')
 }
 
-if (wrappedObj1.set('c', '03') === false && wrappedObj1.set('b', '04') === true && wrappedObj1.obj.b === '04') {
+if (
+  // コンパイルエラー
+  // wrappedObj1.set('c', '03') === false &&
+  wrappedObj1.set('b', '04') === true &&
+  wrappedObj1.obj.b === '04'
+) {
   console.log('OK: set(key, val)')
 } else {
   console.error('NG: set(key, val)')
 }
 
-if (wrappedObj1.get('b') === '04' && wrappedObj1.get('c') === undefined) {
+if (
+  wrappedObj1.get('b') === '04'
+  // コンパイルエラー
+  // && wrappedObj1.get('c') === undefined
+) {
   console.log('OK: get(key)')
 } else {
   console.error('NG: get(key)')
