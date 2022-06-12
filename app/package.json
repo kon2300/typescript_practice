@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "build": "tsc -t ES5",
+    "build": "tsc",
     "lint:eslint": "eslint . --ext ts,tsx",
     "fix:eslint": "eslint . --ext ts,tsx --fix"
   },
